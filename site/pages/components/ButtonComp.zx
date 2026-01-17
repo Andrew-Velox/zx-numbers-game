@@ -1,0 +1,16 @@
+pub const ButtonProps = struct { 
+    onclick: *const fn (zx.EventContext) void, 
+    title: []const u8, 
+    id: []const u8 
+};
+
+pub fn Button(ctx: *zx.ComponentCtx(ButtonProps)) zx.Component {
+    return (
+        <button @allocator={ctx.allocator} class="modern-btn" type="button" onclick={ctx.props.onclick} id={ctx.props.id}>
+            {ctx.props.title}
+        </button>
+    );
+}
+
+
+const zx = @import("zx");
