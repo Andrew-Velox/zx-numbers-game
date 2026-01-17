@@ -17,8 +17,8 @@ pub fn Page(ctx: zx.PageContext) !zx.Component {
                         <option id="lg_3" value="3">3</option>
                         <option id="lg_4" value="4">4</option>
                     </select>
-                    <p>Selected value: {&selectedValue}</p>
-                    <Button onclick={handleIncrement} id="new-game" title="Submit" />
+                    // <p>Selected value: {&selectedValue}</p>
+                    // <Button onclick={handleIncrement} id="new-game" title="Submit" />
                 </div>
 
                 // Numbers Selection

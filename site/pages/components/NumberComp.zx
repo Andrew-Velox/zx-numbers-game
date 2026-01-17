@@ -1,20 +1,44 @@
-const zx = @import("zx");
-const std = @import("std");
-const builtin = @import("builtin");
-pub const Button = @import("./ButtonComp.zig").Button;
 
 pub const NumberProps = struct { 
     lg_num: i32,
 };
 
+pub fn Number(ctx: *zx.ComponentCtx(NumberProps)) zx.Component {
+    if (builtin.cpu.arch == .wasm32) {
+        initNumArr(zx.client_allocator);
+    }
+    
+    return (
+        <div @allocator={ctx.allocator} lg_num={ctx.props.lg_num} class="number-box">
+            // <h4>{ctx.props.lg_num}</h4>
+            <Button onclick={BuildNumberSet} id="swaprows" title="Smash!" />
+            <Button onclick={clearRows} id="clear" title="Clear" />
+            <div>
+                <ul class="item-list">
+                    {for (NumArr.items) |item| (
+                        <span style="display: inline-block; margin: 5px; padding: 10px; background: #a5a5a5; border-radius: 5px;">{item.value}</span>
+                    )}
+                </ul>
+
+                <div>
+                    <span style="color: #ffffff; display: inline-block; margin: 5px; padding: 10px; background: #ef233c; border-radius: 5px;">{NumSum}</span>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+
+
+
 const Item = struct { value: u32, isUsed: bool };
 
 var NumArr = std.ArrayList(Item).empty;
-var NumArr_allocator: std.mem.Allocator = undefined;
 var NumSum: u32 = 0;
+var NumArr_allocator: std.mem.Allocator = undefined;
 var initialized: bool = false;
 
-// Simple stateful random generator
+
 var seed: u32 = 12345;
 fn RandomNumber(max: u32) u32 {
     seed = seed *% 1103515245 +% 12345;
@@ -26,16 +50,6 @@ fn initNumArr(allocator: zx.Allocator) void {
     initialized = true;
     NumArr_allocator = allocator;
     NumArr = std.ArrayList(Item).empty;
-    
-    // Initialize with some numbers
-    for (0..5) |_| {
-        const get_val = small_num[RandomNumber(small_num.len)];
-        const item = Item{
-            .value = get_val,
-            .isUsed = false,
-        };
-        NumArr.append(NumArr_allocator, item) catch @panic("OOM");
-    }
 }
 
 const small_num = [_]u32{ 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10 };
@@ -43,52 +57,45 @@ const big_num = [_]u32{ 25, 50, 75, 100 };
 
 fn BuildNumberSet(_: zx.EventContext) void {
     NumArr.clearRetainingCapacity();
-    for (0..5) |_| {
+    NumSum = 0;
+    for (0..4) |_| {
         const get_val = small_num[RandomNumber(small_num.len)];
         const item = Item{
             .value = get_val,
             .isUsed = false,
         };
         NumArr.append(NumArr_allocator, item) catch @panic("OOM");
+        NumSum += get_val;
     }
+    for (0..2) |_| {
+        const get_val = big_num[RandomNumber(big_num.len)];
+        const item = Item{
+            .value = get_val,
+            .isUsed = false,
+        };
+        NumArr.append(NumArr_allocator, item) catch @panic("OOM");
+        NumSum += get_val;
+    }
+    std.mem.sort(Item, NumArr.items, {}, struct {
+        fn lessThan(_: void, a: Item, b: Item) bool {
+            return a.value > b.value;
+        }
+    }.lessThan);
     zx.requestRender();
 }
 
 fn clearRows(_: zx.EventContext) void {
     NumArr.clearRetainingCapacity();
+    NumSum = 0;
     zx.requestRender();
 }
 
-pub fn Number(ctx: *zx.ComponentCtx(NumberProps)) zx.Component {
-    if (builtin.cpu.arch == .wasm32) {
-        initNumArr(zx.client_allocator);
-    }
-    
-    return (
-        <div @allocator={ctx.allocator} lg_num={ctx.props.lg_num} class="number-box">
-            <h4>{ctx.props.lg_num}</h4>
-            <Button onclick={BuildNumberSet} id="swaprows" title="Smash!" />
-            <Button onclick={clearRows} id="clear" title="Clear" />
-            <div>
-                <ul class="item-list">
-                    {for (NumArr.items) |item| (
-                        <Row @allocator={ctx.allocator} item={item} selected={item.isUsed} />
-                    )}
-                </ul>
-            </div>
-        </div>
-    );
-}
 
-const RowProps = struct { item: Item, selected: bool };
 
-fn Row(ctx: *zx.ComponentCtx(RowProps)) zx.Component {
-    const item = ctx.props.item;
-    const selected = ctx.props.selected;
-    
-    return (
-        <li @allocator={ctx.allocator} class={if (selected) "list-item selected" else "list-item"}>
-            {item.value}
-        </li>
-    );
-}
+
+
+
+const zx = @import("zx");
+const std = @import("std");
+const builtin = @import("builtin");
+pub const Button = @import("./ButtonComp.zig").Button;
