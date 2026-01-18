@@ -19,7 +19,7 @@ pub fn Number(ctx: *zx.ComponentCtx(NumberProps)) zx.Component {
             <div>
                 <ul class="item-list" style="list-style: none; padding: 0; margin: 0;">
                     {for (NumArr.items) |item| (
-                        <span style="color: #ffffff; display: inline-block; min-width: 80px; text-align: center; margin: 5px; padding: 15px 20px; background: #a5a5a5; border-radius: 8px; font-size: 18px; font-weight: bold;">{item.value}</span>
+                        <span style={if (item.isOriginal) "color: #ffffff; display: inline-block; min-width: 80px; text-align: center; margin: 5px; padding: 15px 20px; background: #a5a5a5; border-radius: 8px; font-size: 18px; font-weight: bold;" else "display: none;"}>{item.value}</span>
                     )}
                 </ul>
             </div>
@@ -49,7 +49,13 @@ fn Card(allocator: zx.Allocator) zx.Component {
             
             // Show numbers or operators based on current state
             <div @allocator={allocator} style="display: flex; gap: 10px; flex-wrap: wrap;">
-            {if (currentState == .SelectFirstNumber) (
+            {if (countAvailable() <= 1 and calcHistory.items.len > 0) (
+                // Only one number left - game finished
+                <div @allocator={allocator} style="display: flex; gap: 10px; align-items: center; padding: 15px; background: #22c55e; border-radius: 8px;">
+                    <span style="color: #ffffff; font-size: 18px; font-weight: bold;">✓ Finished! Final Result:</span>
+                    <span style="color: #ffffff; min-width: 60px; text-align: center; padding: 12px 16px; background: #16a34a; border-radius: 8px; font-size: 20px; font-weight: bold;">{getFinalResult()}</span>
+                </div>
+            ) else if (currentState == .SelectFirstNumber) (
                 // Show all available numbers with individual handlers
                 <div @allocator={allocator} style="display: flex; gap: 10px; flex-wrap: wrap;">
                     <button onclick={handleNum0} style={getNumStyle(0)}>{getNumValue(0)}</button>
@@ -115,6 +121,21 @@ fn getSecondStyle(idx: usize) []const u8 {
     return "display: none;";
 }
 
+fn countAvailable() usize {
+    var count: usize = 0;
+    for (NumArr.items) |item| {
+        if (!item.isUsed) count += 1;
+    }
+    return count;
+}
+
+fn getFinalResult() u32 {
+    for (NumArr.items) |item| {
+        if (!item.isUsed) return item.value;
+    }
+    return 0;
+}
+
 fn selectNumber(idx: usize) void {
     if (idx < NumArr.items.len and !NumArr.items[idx].isUsed) {
         firstNumber = NumArr.items[idx].value;
@@ -174,8 +195,11 @@ fn selectSecondNumber(idx: usize) void {
     NumArr.items[idx].isUsed = true;
     
     // Add result as new number
-    const newItem = Item{ .value = result, .isUsed = false };
+    const newItem = Item{ .value = result, .isUsed = false, .isOriginal = false };
     NumArr.append(NumArr_allocator, newItem) catch @panic("OOM");
+    
+    // Sort numbers in descending order
+    sortNumbers();
     
     // Reset to select first number
     currentState = .SelectFirstNumber;
@@ -196,7 +220,7 @@ fn handleSecond9(_: zx.EventContext) void { selectSecondNumber(9); }
 
 
 
-const Item = struct { value: u32, isUsed: bool };
+const Item = struct { value: u32, isUsed: bool, isOriginal: bool };
 
 // Calculation history entry
 const CalcEntry = struct {
@@ -271,6 +295,7 @@ fn BuildNumberSet(_: zx.EventContext) void {
         const item = Item{
             .value = get_val,
             .isUsed = false,
+            .isOriginal = true,
         };
         NumArr.append(NumArr_allocator, item) catch @panic("OOM");
         NumSum += get_val;
@@ -290,16 +315,13 @@ fn BuildNumberSet(_: zx.EventContext) void {
         const item = Item{
             .value = get_val,
             .isUsed = false,
+            .isOriginal = true,
         };
         NumArr.append(NumArr_allocator, item) catch @panic("OOM");
         NumSum += get_val;
     }
 
-    std.mem.sort(Item, NumArr.items, {}, struct {
-        fn lessThan(_: void, a: Item, b: Item) bool {
-            return a.value > b.value;
-        }
-    }.lessThan);
+    sortNumbers();
     zx.requestRender();
 }
 
@@ -309,6 +331,18 @@ fn clearRows(_: zx.EventContext) void {
     NumSum = 0;
     currentState = .SelectFirstNumber;
     zx.requestRender();
+}
+
+fn sortNumbers() void {
+    std.mem.sort(Item, NumArr.items, {}, struct {
+        fn lessThan(_: void, a: Item, b: Item) bool {
+            // Sort unused numbers first, then by value descending
+            if (a.isUsed != b.isUsed) {
+                return !a.isUsed; // unused comes first
+            }
+            return a.value > b.value;
+        }
+    }.lessThan);
 }
 
 fn handleOpAdd(_: zx.EventContext) void {
