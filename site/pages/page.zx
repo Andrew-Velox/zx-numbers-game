@@ -25,7 +25,7 @@ pub fn Page(ctx: zx.PageContext) !zx.Component {
                 // Numbers Selection
                 // <div>
                     
-                    <Number  @rendering={.client} @allocator={ctx.allocator} lg_num={123} />
+                    <GameX  @rendering={.client} @allocator={ctx.allocator} lg_num={123} />
                 // </div>
             </div>
 
@@ -56,5 +56,5 @@ fn handleIncrement(_: zx.EventContext) void {
 
 pub const CounterComponent = @import("./client.zig").CounterComponent;
 pub const Button = @import("./components/ButtonComp.zig").Button;
-pub const Number = @import("./components/NumberComp.zig").Number;
+pub const GameX = @import("./components/NumberComp.zig").GameX;
 const zx = @import("zx");
