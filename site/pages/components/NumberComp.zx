@@ -28,20 +28,205 @@ pub fn Number(ctx: *zx.ComponentCtx(NumberProps)) zx.Component {
                 <Button onclick={BuildNumberSet} id="swaprows" title="Smash!" />
                 <Button onclick={clearRows} id="clear" title="Clear" />
             </div>
-            
+            <Card @allocator={ctx.allocator} />
         </div>
     );
 }
+
+fn Card(allocator: zx.Allocator) zx.Component {
+    return (
+        <div @allocator={allocator} class="card" style="margin-top: 20px;">
+            // Show all calculation history
+            {for (calcHistory.items) |calc| (
+                <div @allocator={allocator} style="display: flex; gap: 10px; align-items: center; margin-bottom: 10px; padding: 10px; background: #1e293b; border-radius: 8px;">
+                    <span style="color: #ffffff; min-width: 50px; text-align: center; padding: 10px 14px; background: #64748b; border-radius: 6px; font-size: 16px; font-weight: bold;">{calc.firstNum}</span>
+                    <span style="color: #f59e0b; font-size: 18px; font-weight: bold;">{calc.operator}</span>
+                    <span style="color: #ffffff; min-width: 50px; text-align: center; padding: 10px 14px; background: #64748b; border-radius: 6px; font-size: 16px; font-weight: bold;">{calc.secondNum}</span>
+                    <span style="color: #ffffff; font-size: 18px; font-weight: bold;">=</span>
+                    <span style="color: #ffffff; min-width: 50px; text-align: center; padding: 10px 14px; background: #22c55e; border-radius: 6px; font-size: 16px; font-weight: bold;">{calc.result}</span>
+                </div>
+            )}
+            
+            // Show numbers or operators based on current state
+            <div @allocator={allocator} style="display: flex; gap: 10px; flex-wrap: wrap;">
+            {if (currentState == .SelectFirstNumber) (
+                // Show all available numbers with individual handlers
+                <div @allocator={allocator} style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button onclick={handleNum0} style={getNumStyle(0)}>{getNumValue(0)}</button>
+                    <button onclick={handleNum1} style={getNumStyle(1)}>{getNumValue(1)}</button>
+                    <button onclick={handleNum2} style={getNumStyle(2)}>{getNumValue(2)}</button>
+                    <button onclick={handleNum3} style={getNumStyle(3)}>{getNumValue(3)}</button>
+                    <button onclick={handleNum4} style={getNumStyle(4)}>{getNumValue(4)}</button>
+                    <button onclick={handleNum5} style={getNumStyle(5)}>{getNumValue(5)}</button>
+                    <button onclick={handleNum6} style={getNumStyle(6)}>{getNumValue(6)}</button>
+                    <button onclick={handleNum7} style={getNumStyle(7)}>{getNumValue(7)}</button>
+                    <button onclick={handleNum8} style={getNumStyle(8)}>{getNumValue(8)}</button>
+                    <button onclick={handleNum9} style={getNumStyle(9)}>{getNumValue(9)}</button>
+                </div>
+            ) else if (currentState == .SelectOperator) (
+                // Show selected first number and operators
+                <div @allocator={allocator} style="display: flex; gap: 10px; align-items: center;">
+                    <span style="color: #ffffff; min-width: 60px; text-align: center; padding: 12px 16px; background: #22c55e; border-radius: 8px; font-size: 16px; font-weight: bold;">{firstNumber}</span>
+                    <button onclick={handleOpAdd} style="color: #ffffff; min-width: 50px; text-align: center; padding: 12px 16px; background: #f59e0b; border-radius: 8px; font-size: 18px; font-weight: bold; border: none; cursor: pointer;">+</button>
+                    <button onclick={handleOpSub} style="color: #ffffff; min-width: 50px; text-align: center; padding: 12px 16px; background: #f59e0b; border-radius: 8px; font-size: 18px; font-weight: bold; border: none; cursor: pointer;">-</button>
+                    <button onclick={handleOpMul} style="color: #ffffff; min-width: 50px; text-align: center; padding: 12px 16px; background: #f59e0b; border-radius: 8px; font-size: 18px; font-weight: bold; border: none; cursor: pointer;">×</button>
+                    <button onclick={handleOpDiv} style="color: #ffffff; min-width: 50px; text-align: center; padding: 12px 16px; background: #f59e0b; border-radius: 8px; font-size: 18px; font-weight: bold; border: none; cursor: pointer;">÷</button>
+                </div>
+            ) else if (currentState == .SelectSecondNumber) (
+                // Show first number, operator, and remaining numbers
+                <div @allocator={allocator} style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <span style="color: #ffffff; min-width: 60px; text-align: center; padding: 12px 16px; background: #22c55e; border-radius: 8px; font-size: 16px; font-weight: bold;">{firstNumber}</span>
+                    <span style="color: #ffffff; min-width: 50px; text-align: center; padding: 12px 16px; background: #f59e0b; border-radius: 8px; font-size: 18px; font-weight: bold;">{selectedOperator}</span>
+                    <button onclick={handleSecond0} style={getSecondStyle(0)}>{getNumValue(0)}</button>
+                    <button onclick={handleSecond1} style={getSecondStyle(1)}>{getNumValue(1)}</button>
+                    <button onclick={handleSecond2} style={getSecondStyle(2)}>{getNumValue(2)}</button>
+                    <button onclick={handleSecond3} style={getSecondStyle(3)}>{getNumValue(3)}</button>
+                    <button onclick={handleSecond4} style={getSecondStyle(4)}>{getNumValue(4)}</button>
+                    <button onclick={handleSecond5} style={getSecondStyle(5)}>{getNumValue(5)}</button>
+                    <button onclick={handleSecond6} style={getSecondStyle(6)}>{getNumValue(6)}</button>
+                    <button onclick={handleSecond7} style={getSecondStyle(7)}>{getNumValue(7)}</button>
+                    <button onclick={handleSecond8} style={getSecondStyle(8)}>{getNumValue(8)}</button>
+                    <button onclick={handleSecond9} style={getSecondStyle(9)}>{getNumValue(9)}</button>
+                </div>
+            )}
+            </div>
+        </div>
+    );
+}
+
+fn getNumValue(idx: usize) u32 {
+    if (idx < NumArr.items.len) {
+        return NumArr.items[idx].value;
+    }
+    return 0;
+}
+
+fn getNumStyle(idx: usize) []const u8 {
+    if (idx < NumArr.items.len and !NumArr.items[idx].isUsed) {
+        return "color: #ffffff; min-width: 60px; text-align: center; padding: 12px 16px; background: #3b82f6; border-radius: 8px; font-size: 16px; font-weight: bold; border: none; cursor: pointer;";
+    }
+    return "display: none;";
+}
+
+fn getSecondStyle(idx: usize) []const u8 {
+    if (idx < NumArr.items.len and !NumArr.items[idx].isUsed and idx != firstNumberIdx) {
+        return "color: #ffffff; min-width: 60px; text-align: center; padding: 12px 16px; background: #3b82f6; border-radius: 8px; font-size: 16px; font-weight: bold; border: none; cursor: pointer;";
+    }
+    return "display: none;";
+}
+
+fn selectNumber(idx: usize) void {
+    if (idx < NumArr.items.len and !NumArr.items[idx].isUsed) {
+        firstNumber = NumArr.items[idx].value;
+        firstNumberIdx = idx;
+        currentState = .SelectOperator;
+        zx.requestRender();
+    }
+}
+
+fn handleNum0(_: zx.EventContext) void { selectNumber(0); }
+fn handleNum1(_: zx.EventContext) void { selectNumber(1); }
+fn handleNum2(_: zx.EventContext) void { selectNumber(2); }
+fn handleNum3(_: zx.EventContext) void { selectNumber(3); }
+fn handleNum4(_: zx.EventContext) void { selectNumber(4); }
+fn handleNum5(_: zx.EventContext) void { selectNumber(5); }
+fn handleNum6(_: zx.EventContext) void { selectNumber(6); }
+fn handleNum7(_: zx.EventContext) void { selectNumber(7); }
+fn handleNum8(_: zx.EventContext) void { selectNumber(8); }
+fn handleNum9(_: zx.EventContext) void { selectNumber(9); }
+
+fn selectSecondNumber(idx: usize) void {
+    if (idx >= NumArr.items.len or NumArr.items[idx].isUsed or idx == firstNumberIdx) return;
+    
+    const secondNumber = NumArr.items[idx].value;
+    
+    // Perform calculation
+    var result: u32 = 0;
+    if (selectedOperatorIdx == 0) { // +
+        result = firstNumber + secondNumber;
+    } else if (selectedOperatorIdx == 1) { // -
+        if (firstNumber >= secondNumber) {
+            result = firstNumber - secondNumber;
+        } else {
+            result = secondNumber - firstNumber;
+        }
+    } else if (selectedOperatorIdx == 2) { // ×
+        result = firstNumber * secondNumber;
+    } else if (selectedOperatorIdx == 3) { // ÷
+        if (secondNumber != 0 and firstNumber % secondNumber == 0) {
+            result = firstNumber / secondNumber;
+        } else if (secondNumber != 0) {
+            result = firstNumber / secondNumber;
+        }
+    }
+    
+    // Add to calculation history
+    const entry = CalcEntry{
+        .firstNum = firstNumber,
+        .secondNum = secondNumber,
+        .operator = selectedOperator,
+        .result = result,
+    };
+    calcHistory.append(NumArr_allocator, entry) catch @panic("OOM");
+    
+    // Mark both numbers as used
+    NumArr.items[firstNumberIdx].isUsed = true;
+    NumArr.items[idx].isUsed = true;
+    
+    // Add result as new number
+    const newItem = Item{ .value = result, .isUsed = false };
+    NumArr.append(NumArr_allocator, newItem) catch @panic("OOM");
+    
+    // Reset to select first number
+    currentState = .SelectFirstNumber;
+    zx.requestRender();
+}
+
+fn handleSecond0(_: zx.EventContext) void { selectSecondNumber(0); }
+fn handleSecond1(_: zx.EventContext) void { selectSecondNumber(1); }
+fn handleSecond2(_: zx.EventContext) void { selectSecondNumber(2); }
+fn handleSecond3(_: zx.EventContext) void { selectSecondNumber(3); }
+fn handleSecond4(_: zx.EventContext) void { selectSecondNumber(4); }
+fn handleSecond5(_: zx.EventContext) void { selectSecondNumber(5); }
+fn handleSecond6(_: zx.EventContext) void { selectSecondNumber(6); }
+fn handleSecond7(_: zx.EventContext) void { selectSecondNumber(7); }
+fn handleSecond8(_: zx.EventContext) void { selectSecondNumber(8); }
+fn handleSecond9(_: zx.EventContext) void { selectSecondNumber(9); }
 
 
 
 
 const Item = struct { value: u32, isUsed: bool };
 
+// Calculation history entry
+const CalcEntry = struct {
+    firstNum: u32,
+    secondNum: u32,
+    operator: []const u8,
+    result: u32,
+};
+
+// State machine for the game flow
+const GameState = enum {
+    SelectFirstNumber,
+    SelectOperator,
+    SelectSecondNumber,
+};
+
 var NumArr = std.ArrayList(Item).empty;
 var NumSum: u32 = 0;
 var NumArr_allocator: std.mem.Allocator = undefined;
 var initialized: bool = false;
+
+// Game state variables
+var currentState: GameState = .SelectFirstNumber;
+var firstNumber: u32 = 0;
+var firstNumberIdx: usize = 0;
+var selectedOperator: []const u8 = "+";
+var selectedOperatorIdx: usize = 0;
+
+// Calculation history
+var calcHistory = std.ArrayList(CalcEntry).empty;
 
 
 var seed: u32 = 12345;
@@ -64,13 +249,25 @@ fn initNumArr(allocator: zx.Allocator) void {
 
 const small_num = [_]u32{ 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10 };
 const big_num = [_]u32{ 25, 50, 75, 100 };
-
+const operators = [_][]const u8{"+", "-", "×", "÷"};
 fn BuildNumberSet(_: zx.EventContext) void {
     NumArr.clearRetainingCapacity();
     NumSum = 0;
     // seed +%= 7919;
+    
+
+    
+    // Track used indices for small_num
+    var used_small = [_]bool{false} ** small_num.len;
     for (0..5) |_| {
-        const get_val = small_num[RandomNumber(small_num.len)];
+        var idx = RandomNumber(small_num.len);
+        // Find an unused index
+        while (used_small[idx]) {
+            idx = RandomNumber(small_num.len);
+        }
+        used_small[idx] = true;
+        
+        const get_val = small_num[idx];
         const item = Item{
             .value = get_val,
             .isUsed = false,
@@ -78,8 +275,18 @@ fn BuildNumberSet(_: zx.EventContext) void {
         NumArr.append(NumArr_allocator, item) catch @panic("OOM");
         NumSum += get_val;
     }
+    
+    // Track used indices for big_num
+    var used_big = [_]bool{false} ** big_num.len;
     for (0..1) |_| {
-        const get_val = big_num[RandomNumber(big_num.len)];
+        var idx = RandomNumber(big_num.len);
+        // Find an unused index
+        while (used_big[idx]) {
+            idx = RandomNumber(big_num.len);
+        }
+        used_big[idx] = true;
+        
+        const get_val = big_num[idx];
         const item = Item{
             .value = get_val,
             .isUsed = false,
@@ -87,6 +294,7 @@ fn BuildNumberSet(_: zx.EventContext) void {
         NumArr.append(NumArr_allocator, item) catch @panic("OOM");
         NumSum += get_val;
     }
+
     std.mem.sort(Item, NumArr.items, {}, struct {
         fn lessThan(_: void, a: Item, b: Item) bool {
             return a.value > b.value;
@@ -97,7 +305,37 @@ fn BuildNumberSet(_: zx.EventContext) void {
 
 fn clearRows(_: zx.EventContext) void {
     NumArr.clearRetainingCapacity();
+    calcHistory.clearRetainingCapacity();
     NumSum = 0;
+    currentState = .SelectFirstNumber;
+    zx.requestRender();
+}
+
+fn handleOpAdd(_: zx.EventContext) void {
+    selectedOperator = "+";
+    selectedOperatorIdx = 0;
+    currentState = .SelectSecondNumber;
+    zx.requestRender();
+}
+
+fn handleOpSub(_: zx.EventContext) void {
+    selectedOperator = "-";
+    selectedOperatorIdx = 1;
+    currentState = .SelectSecondNumber;
+    zx.requestRender();
+}
+
+fn handleOpMul(_: zx.EventContext) void {
+    selectedOperator = "×";
+    selectedOperatorIdx = 2;
+    currentState = .SelectSecondNumber;
+    zx.requestRender();
+}
+
+fn handleOpDiv(_: zx.EventContext) void {
+    selectedOperator = "÷";
+    selectedOperatorIdx = 3;
+    currentState = .SelectSecondNumber;
     zx.requestRender();
 }
 
