@@ -48,6 +48,7 @@ fn Card(allocator: zx.Allocator) zx.Component {
     return (
         <div @allocator={allocator} class="card" style="margin-top: 20px;">
             // Show all calculation history
+            
             {for (calcHistory.items) |calc| (
                 <div @allocator={allocator} style={historyRowStyle}>
                     <span style={historyNumStyle}>{calc.firstNum}</span>
@@ -58,11 +59,17 @@ fn Card(allocator: zx.Allocator) zx.Component {
                 </div>
             )}
             
+            <div>
+                <hr />
+                <h1>Select Numbers</h1>
+                <hr />
+            <br />
+            </div>
             // Finished state
             <div @allocator={allocator} style={getFinishedStyle()}>
                 <span style="color: #ffffff; font-size: 18px; font-weight: bold;">✓ Finished! Final Result:</span>
                 <span style="color: #ffffff; min-width: 60px; text-align: center; padding: 12px 16px; background: #16a34a; border-radius: 8px; font-size: 20px; font-weight: bold;">{getFinalResult()}</span>
-                <span style="color: #ffffff; font-size: 18px; font-weight: bold;">Away</span>
+                <span style="color: #ffffff; font-size: 18px; font-weight: bold;">Difference</span>
             </div>
             
             // Select first number state
@@ -156,7 +163,10 @@ fn countAvailable() usize {
 
 fn getFinalResult() u32 {
     for (NumArr.items) |item| {
-        if (!item.isUsed) return (NumSum-item.value);
+        if (!item.isUsed) {
+            // Absolute difference
+            return if (NumSum >= item.value) NumSum - item.value else item.value - NumSum;
+        }
     }
     return 0;
 }
