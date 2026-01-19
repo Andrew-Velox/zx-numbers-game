@@ -380,7 +380,6 @@ fn makeResultWithRandomOperator() void {
             }
         }
     }
-}
     //     switch (op) {
     //         0 => NumSum += val.value,
     //         1 => NumSum -= val.value,
@@ -390,6 +389,7 @@ fn makeResultWithRandomOperator() void {
     //     }
     // }
 // }
+}
 
 fn clearRows(_: zx.EventContext) void {
     NumArr.clearRetainingCapacity();
