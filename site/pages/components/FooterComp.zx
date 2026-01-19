@@ -1,0 +1,78 @@
+const std = @import("std");
+const zx = @import("zx");
+const js = zx.Client.js;
+const builtin = @import("builtin");
+pub const Button = @import("./ButtonComp.zig").Button;
+
+const dialog_id = "my-dialog";
+const close_btn_id = "close-modal-btn";
+
+fn inClient() bool {
+    return builtin.cpu.arch == .wasm32;
+}
+
+fn openModal(_: zx.EventContext) void {
+    if (!inClient()) return;
+    
+    const document = js.global.get(js.Object, "document") catch return;
+    const element = document.call(js.Object, "getElementById", .{js.string(dialog_id)}) catch return;
+    element.call(void, "showModal", .{}) catch {};
+}
+
+fn closeModal(_: zx.EventContext) void {
+    if (!inClient()) return;
+    
+    const document = js.global.get(js.Object, "document") catch return;
+    const element = document.call(js.Object, "getElementById", .{js.string(dialog_id)}) catch return;
+    element.call(void, "close", .{}) catch {};
+}
+
+pub fn ModalButton(allocator: zx.Allocator) zx.Component {
+    return (
+        <div @{allocator} class="number-box bg-gray-900 p-4 my-2 rounded-lg">
+            <Button onclick={openModal} id="open-modal-btn" title="Show rules" />
+            // <Button onclick={clearRows} id="clear" title="Clear" />
+        </div>
+        // <Button @{allocator} class="bg-blue-500 text-white rounded-md px-4 py-2" onclick={openModal}>
+        //     Open Modal
+        // </Button>
+    );
+}
+
+pub fn CloseButton(allocator: zx.Allocator) zx.Component {
+    return (
+        // <button @{allocator} id={close_btn_id} class="bg-gray-500 text-white rounded-md px-4 py-2" onclick={closeModal}>
+        //     Close
+        // </button>
+
+        <div @{allocator} >
+            <Button onclick={closeModal} id={close_btn_id} title="Close" />
+        </div>
+    );
+}
+
+pub fn Modal(allocator: zx.Allocator) zx.Component {
+    return (
+        <dialog @{allocator} id={dialog_id} class="backdrop:bg-black/50 rounded-lg">
+            <div class="bg-gray-800 text-white rounded-lg shadow-xl p-6 min-w-75">
+                <h2 class="text-xl font-bold mb-4">The Numbers Game</h2>
+                <hr />
+                <p class="mb-4 text-left">This game is from the British TV show <a href="https://en.wikipedia.org/wiki/Countdown_(game_show)" target="_blank" rel="noopener noreferrer" class="text-green-600 underline">Countdown</a>, based on an earlier French game show.</p>
+                <ol class="list-decimal pl-5 space-y-2 text-left mb-4">
+                    <li>A target number between 100 and 999 inclusive is selected at random.</li>
+                    <li>The six other numbers shown below the target must be manipulated to reach the target number.</li>
+                    <li>Only the four basic arithmetic operations are allowed: +, -, × and ÷.</li>
+                    <li>Each number can only be used once in a solution, but the numbers don't all have to be used.</li>
+                    <li>Each step of the calculation must yield a positive, whole number. Division must be exact, without remainders or fractions.</li>
+                    <li>The six numbers are drawn at random from an initial set of 24. These consist of the "small" numbers 1 to 10, each occurring twice, and four "large" numbers: 25, 50, 75 and 100.</li>
+                    <li>The player may choose how many large numbers they want, from 0 to 4. They must make that decision without knowing the target number.</li>
+                    <li>In the TV show, players have 30 seconds to reach the target. There is no timer in the version presented here.</li>
+                    <li>The target cannot always be reached. The objective is to get as close as possible.</li>
+                </ol>
+
+                // <p></p>
+                <CloseButton @rendering={.client} @allocator={allocator} />
+            </div>
+        </dialog>
+    );
+}
