@@ -298,7 +298,7 @@ fn initNumArr(allocator: zx.Allocator) void {
 
 const small_num = [_]u32{ 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10 };
 const big_num = [_]u32{ 25, 50, 75, 100 };
-const operators = [_][]const u8{"+", "-", "×", "÷"};
+const operators = [_][]const u8{ "+", "-", "×", "÷" };
 fn BuildNumberSet(_: zx.EventContext) void {
     NumArr.clearRetainingCapacity();
     NumSum = 0;
@@ -323,7 +323,7 @@ fn BuildNumberSet(_: zx.EventContext) void {
             .isOriginal = true,
         };
         NumArr.append(NumArr_allocator, item) catch @panic("OOM");
-        NumSum += get_val;
+        // NumSum += get_val;
     }
     
     // Track used indices for big_num
@@ -343,12 +343,53 @@ fn BuildNumberSet(_: zx.EventContext) void {
             .isOriginal = true,
         };
         NumArr.append(NumArr_allocator, item) catch @panic("OOM");
-        NumSum += get_val;
+        // NumSum += get_val;
     }
 
+    makeResultWithRandomOperator();
     sortNumbers();
     zx.requestRender();
 }
+
+
+fn makeResultWithRandomOperator() void {
+    if (NumArr.items.len == 0) return;
+    
+
+    while(NumSum < 100 or NumSum > 999){
+        
+        NumSum = NumArr.items[0].value;
+        
+        for (NumArr.items[1..]) |val| {
+            const op = RandomNumber(3);
+            switch (op) {
+                0 => NumSum +%= val.value,  // wrapping add
+                1 => {
+                    if (NumSum >= val.value) {
+                        NumSum -= val.value;
+                    } else {
+                        NumSum += val.value;
+                    }
+                },
+                2 => NumSum *%= val.value,  // wrapping multiply
+                else => {
+                    if (val.value != 0 and NumSum % val.value == 0) {
+                        NumSum /= val.value;
+                    }
+                },
+            }
+        }
+    }
+}
+    //     switch (op) {
+    //         0 => NumSum += val.value,
+    //         1 => NumSum -= val.value,
+    //         2 => NumSum *= val.value,
+    //         else => NumSum = if (val.value != 0 and NumSum % val.value == 0) NumSum / val.value else NumSum,
+            
+    //     }
+    // }
+// }
 
 fn clearRows(_: zx.EventContext) void {
     NumArr.clearRetainingCapacity();
@@ -381,7 +422,6 @@ fn handleOpAdd(_: zx.EventContext) void { selectOperator("+", 0); }
 fn handleOpSub(_: zx.EventContext) void { selectOperator("-", 1); }
 fn handleOpMul(_: zx.EventContext) void { selectOperator("×", 2); }
 fn handleOpDiv(_: zx.EventContext) void { selectOperator("÷", 3); }
-
 
 
 
