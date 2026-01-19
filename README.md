@@ -1,28 +1,9 @@
-# ZX
-This website is built with [ZX](https://github.com/nurulhudaapon/zx).
+# Numbers Game - ZX example
 
-**[Full Documentation →](https://ziex.dev)**
+An example ZX application.
 
-## Installation of ZX 
+<https://zx-numbers-game.vercel.app/>
 
-##### Linux/macOS
-```bash
-curl -fsSL https://ziex.dev/install | bash
-```
+The code is intended to follow best practices, but it is only a small application and decisions about what is 'best' need to be judged in that context.
 
-##### Windows
-```powershell
-powershell -c "irm ziex.dev/install.ps1 | iex"
-
-```
-##### Installing Zig
-```bash
-brew install zig # macOS
-winget install -e --id zig.zig # Windows
-```
-[_See for other platforms →_](https://ziglang.org/learn/getting-started/)
-
-## Running this Project
-```bash
-zx serve
-```
+There will undoubtedly be mistakes in the code. You can report any you find by [opening an issue](https://github.com/Andrew-Velox/zx-numbers-game/issues).
