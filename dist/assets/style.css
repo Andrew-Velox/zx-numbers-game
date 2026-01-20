@@ -198,3 +198,22 @@ select {
         min-width: 44px;
     }
 }
+
+/* Dialog/Modal responsive styles */
+dialog {
+    max-width: calc(100% - 2rem);
+    max-height: calc(100vh - 2rem);
+    margin: auto;
+}
+
+@media (max-width: 640px) {
+    dialog {
+        max-width: calc(100% - 1rem);
+        max-height: calc(100vh - 1rem);
+        margin: 0.5rem;
+    }
+    
+    dialog div {
+        font-size: 0.875rem;
+    }
+}
