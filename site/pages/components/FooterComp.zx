@@ -53,12 +53,12 @@ pub fn CloseButton(allocator: zx.Allocator) zx.Component {
 
 pub fn Modal(allocator: zx.Allocator) zx.Component {
     return (
-        <dialog @{allocator} id={dialog_id} class="backdrop:bg-black/50 rounded-xl border-0 shadow-2xl">
-            <div class="bg-gradient-to-br from-gray-900 to-gray-800 text-white rounded-xl shadow-2xl p-8 max-w-2xl">
-                <h2 class="text-3xl font-bold mb-4 text-center text-white-300 bg-clip-text ">The Numbers Game</h2>
-                <hr class="border-gray-600 mb-4" />
-                <p class="mb-6 text-left text-gray-300 leading-relaxed">This game is from the British TV show <a href="https://en.wikipedia.org/wiki/Countdown_(game_show)" target="_blank" rel="noopener noreferrer" class="text-green-400 hover:text-green-300 underline font-semibold transition-colors">Countdown</a>, based on an earlier French game show.</p>
-                <ol class="list-decimal pl-6 space-y-3 text-left mb-6 text-gray-200">
+        <dialog @{allocator} id={dialog_id} class="backdrop:bg-black/50 rounded-xl border-0 shadow-2xl w-full max-w-2xl mx-4 md:mx-auto">
+            <div class="bg-gradient-to-br from-gray-900 to-gray-800 text-white rounded-xl shadow-2xl p-4 md:p-8 max-h-[90vh] overflow-y-auto">
+                <h2 class="text-xl md:text-3xl font-bold mb-3 md:mb-4 text-center text-white-300 bg-clip-text">The Numbers Game</h2>
+                <hr class="border-gray-600 mb-3 md:mb-4" />
+                <p class="mb-4 md:mb-6 text-left text-sm md:text-base text-gray-300 leading-relaxed">This game is from the British TV show <a href="https://en.wikipedia.org/wiki/Countdown_(game_show)" target="_blank" rel="noopener noreferrer" class="text-green-400 hover:text-green-300 underline font-semibold transition-colors">Countdown</a>, based on an earlier French game show.</p>
+                <ol class="list-decimal pl-4 md:pl-6 space-y-2 md:space-y-3 text-left mb-4 md:mb-6 text-sm md:text-base text-gray-200">
                     <li class="leading-relaxed">A target number between <span class="font-bold text-blue-400">100 and 999</span> inclusive is selected at random.</li>
                     <li class="leading-relaxed">The six other numbers shown below the target must be manipulated to reach the target number.</li>
                     <li class="leading-relaxed">Only the four basic arithmetic operations are allowed: <span class="font-bold text-green-400">+, -, ×</span> and <span class="font-bold text-green-400">÷</span>.</li>
@@ -70,7 +70,7 @@ pub fn Modal(allocator: zx.Allocator) zx.Component {
                     <li class="leading-relaxed">The target cannot always be reached. The objective is to <span class="font-bold text-green-400">get as close as possible</span>.</li>
                 </ol>
 
-                <div class="flex justify-center mt-6">
+                <div class="flex justify-center mt-4 md:mt-6">
                     <CloseButton @rendering={.client} @allocator={allocator} />
                 </div>
             </div>
