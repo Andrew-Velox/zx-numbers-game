@@ -53,25 +53,26 @@ pub fn CloseButton(allocator: zx.Allocator) zx.Component {
 
 pub fn Modal(allocator: zx.Allocator) zx.Component {
     return (
-        <dialog @{allocator} id={dialog_id} class="backdrop:bg-black/50 rounded-lg">
-            <div class="bg-gray-800 text-white rounded-lg shadow-xl p-6 min-w-75">
-                <h2 class="text-xl font-bold mb-4">The Numbers Game</h2>
-                <hr />
-                <p class="mb-4 text-left">This game is from the British TV show <a href="https://en.wikipedia.org/wiki/Countdown_(game_show)" target="_blank" rel="noopener noreferrer" class="text-green-600 underline">Countdown</a>, based on an earlier French game show.</p>
-                <ol class="list-decimal pl-5 space-y-2 text-left mb-4">
-                    <li>A target number between 100 and 999 inclusive is selected at random.</li>
-                    <li>The six other numbers shown below the target must be manipulated to reach the target number.</li>
-                    <li>Only the four basic arithmetic operations are allowed: +, -, × and ÷.</li>
-                    <li>Each number can only be used once in a solution, but the numbers don't all have to be used.</li>
-                    <li>Each step of the calculation must yield a positive, whole number. Division must be exact, without remainders or fractions.</li>
-                    <li>The six numbers are drawn at random from an initial set of 24. These consist of the "small" numbers 1 to 10, each occurring twice, and four "large" numbers: 25, 50, 75 and 100.</li>
-                    <li>The player may choose how many large numbers they want, from 0 to 4. They must make that decision without knowing the target number.</li>
-                    <li>In the TV show, players have 30 seconds to reach the target. There is no timer in the version presented here.</li>
-                    <li>The target cannot always be reached. The objective is to get as close as possible.</li>
+        <dialog @{allocator} id={dialog_id} class="backdrop:bg-black/50 rounded-xl border-0 shadow-2xl">
+            <div class="bg-gradient-to-br from-gray-900 to-gray-800 text-white rounded-xl shadow-2xl p-8 max-w-2xl">
+                <h2 class="text-3xl font-bold mb-4 text-center text-white-300 bg-clip-text ">The Numbers Game</h2>
+                <hr class="border-gray-600 mb-4" />
+                <p class="mb-6 text-left text-gray-300 leading-relaxed">This game is from the British TV show <a href="https://en.wikipedia.org/wiki/Countdown_(game_show)" target="_blank" rel="noopener noreferrer" class="text-green-400 hover:text-green-300 underline font-semibold transition-colors">Countdown</a>, based on an earlier French game show.</p>
+                <ol class="list-decimal pl-6 space-y-3 text-left mb-6 text-gray-200">
+                    <li class="leading-relaxed">A target number between <span class="font-bold text-blue-400">100 and 999</span> inclusive is selected at random.</li>
+                    <li class="leading-relaxed">The six other numbers shown below the target must be manipulated to reach the target number.</li>
+                    <li class="leading-relaxed">Only the four basic arithmetic operations are allowed: <span class="font-bold text-green-400">+, -, ×</span> and <span class="font-bold text-green-400">÷</span>.</li>
+                    <li class="leading-relaxed">Each number can only be used <span class="font-bold text-yellow-400">once</span> in a solution, but the numbers don't all have to be used.</li>
+                    <li class="leading-relaxed">Each step of the calculation must yield a <span class="font-bold text-blue-400">positive, whole number</span>. Division must be exact, without remainders or fractions.</li>
+                    <li class="leading-relaxed">The six numbers are drawn at random from an initial set of 24. These consist of the "small" numbers <span class="font-bold">1 to 10</span>, each occurring twice, and four "large" numbers: <span class="font-bold text-orange-400">25, 50, 75 and 100</span>.</li>
+                    <li class="leading-relaxed">The player may choose how many large numbers they want, from <span class="font-bold">0 to 4</span>. They must make that decision without knowing the target number.</li>
+                    <li class="leading-relaxed">In the TV show, players have <span class="font-bold text-red-400">30 seconds</span> to reach the target. There is no timer in the version presented here.</li>
+                    <li class="leading-relaxed">The target cannot always be reached. The objective is to <span class="font-bold text-green-400">get as close as possible</span>.</li>
                 </ol>
 
-                // <p></p>
-                <CloseButton @rendering={.client} @allocator={allocator} />
+                <div class="flex justify-center mt-6">
+                    <CloseButton @rendering={.client} @allocator={allocator} />
+                </div>
             </div>
         </dialog>
     );

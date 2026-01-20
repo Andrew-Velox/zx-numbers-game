@@ -3,7 +3,7 @@ pub fn Page(ctx: zx.PageContext) !zx.Component {
     return (
         <main @allocator={ctx.arena}>
 
-            <div class="w-[800px] max-w-full mx-auto p-4">
+            <div class="game-container">
                 // <div class="w-full flex items-center gap-3 justify-center bg-gray-900 p-4 rounded-lg">
                 //     <h3 class="text-base font-normal m-0">How many large Numbers?</h3>
                 //     <select 
@@ -42,18 +42,7 @@ pub fn Page(ctx: zx.PageContext) !zx.Component {
         </main>
     );
 }
-var count: i128 = 0;
-var selectedValue: zx.Signal(i32) = .init(0);
-var lg_num_cnt: zx.Signal(i32) = .init(0);
 
-fn handleSelectChange(_: zx.EventContext) void {
-    
-}
-
-fn handleIncrement(_: zx.EventContext) void {
-    lg_num_cnt.set(lg_num_cnt.get() + 1);
-    // std.log.info("value: {d}", .{countt.get()});
-}
 
 
 pub const CounterComponent = @import("./client.zig").CounterComponent;
