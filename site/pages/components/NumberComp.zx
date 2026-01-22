@@ -62,11 +62,10 @@ fn Card(allocator: zx.Allocator) zx.Component {
                 </div>
             )}
             
-            <div class="w-full">
+            <div @allocator={allocator} class="w-full" style={selectNumDiv()}>
                 <hr class="border-[3px] border-teal-400" />
                 <h1 class="text-2xl font-bold text-gray-700">Select Numbers</h1>
                 <hr class="border-[3px] border-teal-400" />
-            <br />
             </div>
             // Finished state
             <div @allocator={allocator} style={getFinishedStyle()}>
@@ -123,6 +122,14 @@ fn getFinishedStyle() []const u8 {
         return "display: flex; gap: 10px; align-items: center; padding: 15px; background: #22c55e; border-radius: 8px;";
     }
     return hiddenStyle;
+}
+
+fn selectNumDiv() []const u8 {
+    if (countAvailable() <= 0) {
+        return hiddenStyle;
+    }
+    return "display: block; text-align: center;";
+    
 }
 
 fn getSelectFirstStyle() []const u8 {
@@ -292,7 +299,7 @@ fn initNumArr(allocator: zx.Allocator) void {
     initialized = true;
     NumArr_allocator = allocator;
     NumArr = std.ArrayList(Item).empty;
-
+    initOriginalArray();
 }
 
 
@@ -368,7 +375,7 @@ fn BuildNumberSet(_: zx.EventContext) void {
 fn makeResultWithRandomOperator() void {
     if (NumArr.items.len == 0) return;
     
-
+    
     while(NumSum < 100 or NumSum > 999){
         
         NumSum = NumArr.items[0].value;
@@ -404,8 +411,21 @@ fn makeResultWithRandomOperator() void {
 // }
 }
 
+
+fn initOriginalArray() void {
+    for(1..7) |_|{
+        OriginalNumbers.append(NumArr_allocator, 0) catch @panic("OOM");
+    }
+}
+
+
+
 fn clearRows(_: zx.EventContext) void {
     NumArr.clearRetainingCapacity();
+    OriginalNumbers.clearRetainingCapacity();
+    initOriginalArray();
+
+
     calcHistory.clearRetainingCapacity();
     NumSum = 0;
     currentState = .SelectFirstNumber;
