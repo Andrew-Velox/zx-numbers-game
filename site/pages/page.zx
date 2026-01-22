@@ -48,7 +48,6 @@ pub fn Page(ctx: zx.PageContext) !zx.Component {
 pub const CounterComponent = @import("./client.zig").CounterComponent;
 pub const Button = @import("./components/ButtonComp.zig").Button;
 pub const GameX = @import("./components/NumberComp.zig").GameX;
-pub const ModalButton = @import("./components/FooterComp.zig").ModalButton;
-pub const Modal = @import("./components/FooterComp.zig").Modal;
-// pub const FooterComp = @import("./components/FooterComp.zig").Modal(allocator: zx.Allocator);
+pub const ModalButton = @import("./components/ModalComp.zig").ModalButton;
+pub const Modal = @import("./components/ModalComp.zig").Modal;
 const zx = @import("zx");
