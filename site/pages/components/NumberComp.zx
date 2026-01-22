@@ -5,8 +5,10 @@ pub const GameXProps = struct {
 
 pub fn GameX(ctx: *zx.ComponentCtx(GameXProps)) zx.Component {
     if (builtin.cpu.arch == .wasm32) {
+        // initOriginalArray();
         initNumArr(zx.client_allocator);
     }
+    const sixItems = [_]void{{}, {}, {}, {}, {}, {}};
     
     return (
         <div @allocator={ctx.allocator} lg_num={ctx.props.lg_num} class="number-box bg-white rounded-lg shadow-lg">
@@ -16,7 +18,17 @@ pub fn GameX(ctx: *zx.ComponentCtx(GameXProps)) zx.Component {
                 <span style="color: #ffffff; display: inline-block; min-width: 70px; text-align: center; margin: 3px; padding: 10px 15px; background: #ef233c;  font-size: 18px; font-weight: bold;box-shadow: inset 0 0 10px #000000;">{NumSum}</span>
             </div>
 
-            <div>
+            <div style={getInitialNumStyle()}>
+                <ul class="item-list" style="list-style: none; padding: 0; margin: 0;">
+                    {for (sixItems) |_| (
+                        <span
+                        style="color: black; display: inline-block; min-width: 70px; text-align: center; margin: 3px; padding: 10px 15px;  font-size: 16px; font-weight: bold; box-shadow: inset 0 0 20px #a1a1a1;">
+                            0
+                        </span>
+                    )}
+                </ul>
+            </div>
+            <div style={getOriginalNumStyle()}>
                 <ul class="item-list" style="list-style: none; padding: 0; margin: 0;">
                     {for (OriginalNumbers.items) |val| (
                         <span
@@ -129,7 +141,16 @@ fn selectNumDiv() []const u8 {
         return hiddenStyle;
     }
     return "display: block; text-align: center;";
-    
+}
+
+fn getInitialNumStyle() []const u8 {
+    if (NumArr.items.len == 0) return "display: block;";
+    return hiddenStyle;
+}
+
+fn getOriginalNumStyle() []const u8 {
+    if (NumArr.items.len > 0) return "display: block;";
+    return hiddenStyle;
 }
 
 fn getSelectFirstStyle() []const u8 {
@@ -299,7 +320,11 @@ fn initNumArr(allocator: zx.Allocator) void {
     initialized = true;
     NumArr_allocator = allocator;
     NumArr = std.ArrayList(Item).empty;
-    initOriginalArray();
+    
+    // Initialize with zeros for initial display
+    for (0..6) |_| {
+        OriginalNumbers.append(NumArr_allocator, 0) catch @panic("OOM");
+    }
 }
 
 
