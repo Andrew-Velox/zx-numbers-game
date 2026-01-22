@@ -18,10 +18,10 @@ pub fn GameX(ctx: *zx.ComponentCtx(GameXProps)) zx.Component {
 
             <div>
                 <ul class="item-list" style="list-style: none; padding: 0; margin: 0;">
-                    {for (NumArr.items) |item| (
+                    {for (OriginalNumbers.items) |val| (
                         <span
                         style="color: black; display: inline-block; min-width: 70px; text-align: center; margin: 3px; padding: 10px 15px;  font-size: 16px; font-weight: bold; box-shadow: inset 0 0 20px #a1a1a1;">
-                            {item.value}
+                            {val}
                         </span>
                     )}
                 </ul>
@@ -226,11 +226,8 @@ fn selectSecondNumber(idx: usize) void {
     const newItem = Item{ .value = result, .isUsed = false, .isOriginal = false };
     NumArr.append(NumArr_allocator, newItem) catch @panic("OOM");
     
-    // Sort numbers in descending order
-    sortNumbers();
-    
-    // Reset to select first number
     currentState = .SelectFirstNumber;
+    sortNumbers();
     zx.requestRender();
 }
 
@@ -266,6 +263,7 @@ const GameState = enum {
 };
 
 var NumArr = std.ArrayList(Item).empty;
+var OriginalNumbers = std.ArrayList(u32).empty;
 var NumSum: u32 = 0;
 var NumArr_allocator: std.mem.Allocator = undefined;
 var initialized: bool = false;
@@ -282,6 +280,8 @@ var calcHistory = std.ArrayList(CalcEntry).empty;
 
 
 var seed: u32 = 12345;
+var clickCount: u32 = 0;
+
 fn RandomNumber(max: u32) u32 {
     seed = seed *% 1103515245 +% 12345;
     return seed % max;
@@ -302,9 +302,10 @@ const big_num = [_]u32{ 25, 50, 75, 100 };
 const operators = [_][]const u8{ "+", "-", "×", "÷" };
 fn BuildNumberSet(_: zx.EventContext) void {
     NumArr.clearRetainingCapacity();
+    OriginalNumbers.clearRetainingCapacity();
+    calcHistory.clearRetainingCapacity();
+    currentState = .SelectFirstNumber;
     NumSum = 0;
-    // seed +%= 7919;
-    
 
     
     // Track used indices for small_num
@@ -348,6 +349,17 @@ fn BuildNumberSet(_: zx.EventContext) void {
     }
 
     makeResultWithRandomOperator();
+    
+    // Save and sort original numbers once for top display
+    for (NumArr.items) |item| {
+        OriginalNumbers.append(NumArr_allocator, item.value) catch @panic("OOM");
+    }
+    std.mem.sort(u32, OriginalNumbers.items, {}, struct {
+        fn lessThan(_: void, a: u32, b: u32) bool {
+            return a > b;
+        }
+    }.lessThan);
+    
     sortNumbers();
     zx.requestRender();
 }
