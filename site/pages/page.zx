@@ -4,29 +4,29 @@ pub fn Page(ctx: zx.PageContext) !zx.Component {
         <main @allocator={ctx.arena}>
 
             <div class="game-container">
-                // <div class="w-full flex items-center gap-3 justify-center bg-gray-900 p-4 rounded-lg">
-                //     <h3 class="text-base font-normal m-0">How many large Numbers?</h3>
-                //     <select 
-                //         id="mySelect"
-                //         onchange={handleSelectChange}
-                //         class="px-8 py-2 bg-gray-800 text-white text-sm border-2 border-gray-600 rounded-lg cursor-pointer hover:border-gray-400 focus:outline-none focus:border-blue-500 transition-colors"
-                //         >
-                //         <option id="lg_0" value="0">0</option>
-                //         <option id="lg_1" value="1">1</option>
-                //         <option id="lg_2" value="2">2</option>
-                //         <option id="lg_3" value="3">3</option>
-                //         <option id="lg_4" value="4">4</option>
-                //     </select>
-                //     // <p>Selected value: {&selectedValue}</p>
-                //     // <Button onclick={handleIncrement} id="new-game" title="Submit" />
-                //     //  <Button onclick={BuildNumberSet} id="swaprows" title="Smash!" />
-                // </div>
+                <div class="w-full flex items-center gap-3 justify-center bg-gray-900 p-4 rounded-lg">
+                    <h5 class=" font-bold text-2xl m-0">ZX Numbers Game</h5>
+                    // <h3 class="text-base font-normal m-0">How many large Numbers?</h3>
+                    // <select 
+                    //     id="mySelect"
+                        
+                    //     class="px-8 py-2 bg-gray-800 text-white text-sm border-2 border-gray-600 rounded-lg cursor-pointer hover:border-gray-400 focus:outline-none focus:border-blue-500 transition-colors"
+                    //     >
+                    //     <option id="lg_0" value="0">0</option>
+                    //     <option id="lg_1" value="1">1</option>
+                    //     <option id="lg_2" value="2">2</option>
+                    //     <option id="lg_3" value="3">3</option>
+                    //     <option id="lg_4" value="4">4</option>
+                    // </select>
+                    // <p>Selected value: {&selectedValue}</p>
+                    // <Button onclick={handleIncrement} id="new-game" title="Submit" />
+                    //  <Button onclick={BuildNumberSet} id="swaprows" title="Smash!" />
+                </div>
 
-                // Numbers Selection
-                // <div>
+                <div>
                     
                     <GameX  @rendering={.client} @allocator={ctx.allocator} lg_num={123} />
-                // </div>
+                </div>
                     <ModalButton @rendering={.client} @allocator={ctx.allocator} />
             </div>
 
