@@ -76,7 +76,7 @@ fn Card(allocator: zx.Allocator) zx.Component {
             
             <div @allocator={allocator} class="w-full" style={selectNumDiv()}>
                 <hr class="border-[3px] border-teal-400" />
-                <h1 class="text-2xl font-bold text-gray-700">Select Numbers</h1>
+                <h1 class="text-2xl font-bold text-gray-700 italic font-mono">Select Numbers</h1>
                 <hr class="border-[3px] border-teal-400" />
             </div>
             // Finished state
