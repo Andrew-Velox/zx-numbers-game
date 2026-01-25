@@ -44,6 +44,10 @@ pub fn GameX(ctx: *zx.ComponentCtx(GameXProps)) zx.Component {
                 <Button onclick={clearRows} id="clear" title="Clear" />
             </div>
             <Card @allocator={ctx.allocator} />
+
+            <div>
+                <Hints @allocator={ctx.allocator} />
+            </div>
         </div>
     );
 }
@@ -127,6 +131,40 @@ fn Card(allocator: zx.Allocator) zx.Component {
         </div>
     );
 }
+
+fn Hints(allocator: zx.Allocator) zx.Component {
+    return (
+        <div @allocator={allocator}>
+            <h1 class="text-blue-500">Show Hints</h1>
+
+            <div style={getOriginalNumStyle()}>
+                <ul class="item-list" style="list-style: none; padding: 0; margin: 0;">
+                    {for (ResultStoredArray.items) |val| (
+                        <span
+                        style="color: black; display: inline-block; min-width: 70px; text-align: center; margin: 3px; padding: 10px 15px;  font-size: 16px; font-weight: bold; box-shadow: inset 0 0 20px #a1a1a1;">
+                            {val.num1} {val.expression} {val.num2} = {val.result}
+                        </span>
+                    )}
+                </ul>
+            </div>
+        </div>
+    );
+}
+
+
+// Show hints components codes
+// const ResultItem = struct { value: u32, isUsed: bool, isOriginal: bool };
+const ResultItem = struct { 
+    num1 : u32,
+    num2 : u32,
+    expression : []const u8,
+    result : u32,
+ };
+
+
+var ResultStoredArray = std.ArrayList(ResultItem).empty;
+
+
 
 // State visibility helpers
 fn getFinishedStyle() []const u8 {
@@ -448,20 +486,21 @@ fn BuildNumberSet(_: zx.EventContext) void {
 fn makeResultWithRandomOperator() void {
     if (NumArr.items.len == 0) return;
     
-    
     while(NumSum < 100 or NumSum > 999){
+        ResultStoredArray.clearRetainingCapacity();
         
         NumSum = NumArr.items[0].value;
         
         for (NumArr.items[1..]) |val| {
             const op = RandomNumber(3);
+            const first_num = NumSum;
             switch (op) {
                 0 => NumSum +%= val.value,  // wrapping add
                 1 => {
                     if (NumSum >= val.value) {
                         NumSum -= val.value;
                     } else {
-                        NumSum += val.value;
+                        continue;
                     }
                 },
                 2 => NumSum *%= val.value,  // wrapping multiply
@@ -470,7 +509,18 @@ fn makeResultWithRandomOperator() void {
                         NumSum /= val.value;
                     }
                 },
+
+
             }
+            // storing results................................
+            const getItems = ResultItem{
+                .num1 = first_num,
+                .num2 = val.value,
+                .expression = operators[op],
+                .result = NumSum,
+            };
+            ResultStoredArray.append(NumArr_allocator, getItems) catch @panic("OOM");
+            // ...............................................
         }
     }
     //     switch (op) {
