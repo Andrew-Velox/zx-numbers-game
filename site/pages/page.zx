@@ -45,7 +45,6 @@ pub fn Page(ctx: zx.PageContext) !zx.Component {
 
 
 
-pub const CounterComponent = @import("./client.zig").CounterComponent;
 pub const Button = @import("./components/ButtonComp.zig").Button;
 pub const GameX = @import("./components/NumberComp.zig").GameX;
 pub const ModalButton = @import("./components/ModalComp.zig").ModalButton;
