@@ -146,7 +146,12 @@ var ResultStoredArray = std.ArrayList(HintItem).empty;
 
 // State visibility helpers
 fn getFinishedStyle() []const u8 {
-    if (countAvailable() <= 1 and calcHistory.items.len > 0) {
+
+    if ( NumArr.items.len > 0 ) CopyNumArr = NumArr;
+
+    const now_final_result = getFinalResult();
+    if ( (now_final_result == 0 and countAvailable() != 0 ) or (countAvailable() <= 1 and calcHistory.items.len > 0)) {
+        NumArr.clearRetainingCapacity();
         return "display: flex; gap: 10px; align-items: center; padding: 15px; background: #22c55e; border-radius: 8px;";
     }
     return hiddenStyle;
@@ -250,14 +255,14 @@ fn getDivideButtonStyle() []const u8 {
 
 fn countAvailable() usize {
     var count: usize = 0;
-    for (NumArr.items) |item| {
+    for (CopyNumArr.items) |item| {
         if (!item.isUsed) count += 1;
     }
     return count;
 }
 
 fn getFinalResult() u32 {
-    for (NumArr.items) |item| {
+    for (CopyNumArr.items) |item| {
         if (!item.isUsed) {
             // Absolute difference
             return if (NumSum >= item.value) NumSum - item.value else item.value - NumSum;
@@ -355,6 +360,7 @@ const GameState = enum {
 };
 
 var NumArr = std.ArrayList(Item).empty;
+var CopyNumArr = std.ArrayList(Item).empty;
 var OriginalNumbers = std.ArrayList(u32).empty;
 var NumSum: u32 = 0;
 var NumArr_allocator: std.mem.Allocator = undefined;
