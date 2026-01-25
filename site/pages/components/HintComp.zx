@@ -19,7 +19,7 @@ pub fn Hints(ctx: *zx.ComponentCtx(HintsProps)) zx.Component {
     showNextHintCallback = ctx.props.onShowNext;
     
     return (
-        <div @allocator={ctx.allocator} class="">
+        <div @allocator={ctx.allocator} style={getContainerStyle(totalHints)}>
             <div style={getHintsButtonStyle(totalHints, hintsShown)}>
                 <Button onclick={handleShowNextHint} id="show-hint" title="Show Hint 💡" />
             </div>
@@ -28,10 +28,21 @@ pub fn Hints(ctx: *zx.ComponentCtx(HintsProps)) zx.Component {
                 <h1 class="text-white-500 mb-2 bg-gray-500 italic font-mono rounded">HINTS</h1>
                 <ul class="item-list" style="list-style: none; padding: 0; margin: 0;">
                     {for (hints[0..hintsShown]) |val| (
-                        <span
-                        style="color: black; display: inline-block; min-width: 70px; text-align: center; margin: 3px; padding: 10px 15px;  font-size: 16px; font-weight: bold; box-shadow: inset 0 0 20px #a1a1a1;">
-                            {val.num1} {val.expression} {val.num2} = {val.result}
-                        </span>
+                        <div style="display: flex; align-items: center; gap: 10px; margin: 10px 0; padding: 16px 20px; background: #1e293b; border-left: 4px solid #3b82f6; border-radius: 8px;">
+                            <span style="color: #e2e8f0; font-size: 16px; font-weight: 600;">
+                                {val.num1}
+                            </span>
+                            <span style="color: #94a3b8; font-size: 16px;">
+                                {val.expression}
+                            </span>
+                            <span style="color: #e2e8f0; font-size: 16px; font-weight: 600;">
+                                {val.num2}
+                            </span>
+                            <span style="color: #94a3b8; font-size: 16px;">=</span>
+                            <span style="color: #3b82f6; font-size: 18px; font-weight: 700; margin-left: 4px;">
+                                {val.result}
+                            </span>
+                        </div>
                     )}
                 </ul>
             </div>
@@ -42,6 +53,13 @@ pub fn Hints(ctx: *zx.ComponentCtx(HintsProps)) zx.Component {
 const hiddenStyle = "display: none;";
 
 // Hint visibility functions
+fn getContainerStyle(totalHints: usize) []const u8 {
+    if (totalHints > 0) {
+        return "background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); padding: 20px; border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.2);";
+    }
+    return "";
+}
+
 fn getHintsButtonStyle(totalHints: usize, hintsShown: usize) []const u8 {
     if (totalHints > 0 and hintsShown < totalHints) {
         return "display: block; margin-top: 10px;";
