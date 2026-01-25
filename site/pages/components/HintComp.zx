@@ -1,0 +1,67 @@
+pub const HintItem = struct { 
+    num1: u32,
+    num2: u32,
+    expression: []const u8,
+    result: u32,
+};
+
+pub const HintsProps = struct {
+    hintsShown: usize,
+    totalHints: usize,
+    hints: []const HintItem,
+    onShowNext: *const fn() void,
+};
+
+pub fn Hints(ctx: *zx.ComponentCtx(HintsProps)) zx.Component {
+    const hintsShown = ctx.props.hintsShown;
+    const hints = ctx.props.hints;
+    const totalHints = ctx.props.totalHints;
+    showNextHintCallback = ctx.props.onShowNext;
+    
+    return (
+        <div @allocator={ctx.allocator} class="">
+            <div style={getHintsButtonStyle(totalHints, hintsShown)}>
+                <Button onclick={handleShowNextHint} id="show-hint" title="Show Hint 💡" />
+            </div>
+
+            <div style={getHintsDisplayStyle(hintsShown)}>
+                <h1 class="text-white-500 mb-2 bg-gray-500 italic font-mono rounded">HINTS</h1>
+                <ul class="item-list" style="list-style: none; padding: 0; margin: 0;">
+                    {for (hints[0..hintsShown]) |val| (
+                        <span
+                        style="color: black; display: inline-block; min-width: 70px; text-align: center; margin: 3px; padding: 10px 15px;  font-size: 16px; font-weight: bold; box-shadow: inset 0 0 20px #a1a1a1;">
+                            {val.num1} {val.expression} {val.num2} = {val.result}
+                        </span>
+                    )}
+                </ul>
+            </div>
+        </div>
+    );
+}
+
+const hiddenStyle = "display: none;";
+
+// Hint visibility functions
+fn getHintsButtonStyle(totalHints: usize, hintsShown: usize) []const u8 {
+    if (totalHints > 0 and hintsShown < totalHints) {
+        return "display: block; margin-top: 10px;";
+    }
+    return hiddenStyle;
+}
+
+fn getHintsDisplayStyle(hintsShown: usize) []const u8 {
+    if (hintsShown > 0) {
+        return "display: block; margin-top: 10px;";
+    }
+    return hiddenStyle;
+}
+
+fn handleShowNextHint(_: zx.EventContext) void {
+    showNextHintCallback();
+}
+
+var showNextHintCallback: *const fn() void = undefined;
+
+const zx = @import("zx");
+const std = @import("std");
+pub const Button = @import("./ButtonComp.zig").Button;

@@ -46,7 +46,7 @@ pub fn GameX(ctx: *zx.ComponentCtx(GameXProps)) zx.Component {
             <Card @allocator={ctx.allocator} />
 
             <div>
-                <Hints @allocator={ctx.allocator} />
+                <Hints @allocator={ctx.allocator} hintsShown={hintsShown} totalHints={ResultStoredArray.items.len} hints={ResultStoredArray.items} onShowNext={showNextHintWrapper} />
             </div>
         </div>
     );
@@ -132,38 +132,16 @@ fn Card(allocator: zx.Allocator) zx.Component {
     );
 }
 
-fn Hints(allocator: zx.Allocator) zx.Component {
-    return (
-        <div @allocator={allocator}>
-            <h1 class="text-blue-500">Show Hints</h1>
-
-            <div style={getOriginalNumStyle()}>
-                <ul class="item-list" style="list-style: none; padding: 0; margin: 0;">
-                    {for (ResultStoredArray.items) |val| (
-                        <span
-                        style="color: black; display: inline-block; min-width: 70px; text-align: center; margin: 3px; padding: 10px 15px;  font-size: 16px; font-weight: bold; box-shadow: inset 0 0 20px #a1a1a1;">
-                            {val.num1} {val.expression} {val.num2} = {val.result}
-                        </span>
-                    )}
-                </ul>
-            </div>
-        </div>
-    );
+// Wrapper function for hint callback
+fn showNextHintWrapper() void {
+    if (hintsShown < ResultStoredArray.items.len) {
+        hintsShown += 1;
+        zx.requestRender();
+    }
 }
 
-
 // Show hints components codes
-// const ResultItem = struct { value: u32, isUsed: bool, isOriginal: bool };
-const ResultItem = struct { 
-    num1 : u32,
-    num2 : u32,
-    expression : []const u8,
-    result : u32,
- };
-
-
-var ResultStoredArray = std.ArrayList(ResultItem).empty;
-
+var ResultStoredArray = std.ArrayList(HintItem).empty;
 
 
 // State visibility helpers
@@ -392,6 +370,8 @@ var selectedOperatorIdx: usize = 0;
 // Calculation history
 var calcHistory = std.ArrayList(CalcEntry).empty;
 
+// Hints tracking
+var hintsShown: usize = 0;
 
 var seed: u32 = 12345;
 var clickCount: u32 = 0;
@@ -424,6 +404,7 @@ fn BuildNumberSet(_: zx.EventContext) void {
     calcHistory.clearRetainingCapacity();
     currentState = .SelectFirstNumber;
     NumSum = 0;
+    hintsShown = 0;
 
     
     // Track used indices for small_num
@@ -513,7 +494,7 @@ fn makeResultWithRandomOperator() void {
 
             }
             // storing results................................
-            const getItems = ResultItem{
+            const getItems = HintItem{
                 .num1 = first_num,
                 .num2 = val.value,
                 .expression = operators[op],
@@ -523,15 +504,7 @@ fn makeResultWithRandomOperator() void {
             // ...............................................
         }
     }
-    //     switch (op) {
-    //         0 => NumSum += val.value,
-    //         1 => NumSum -= val.value,
-    //         2 => NumSum *= val.value,
-    //         else => NumSum = if (val.value != 0 and NumSum % val.value == 0) NumSum / val.value else NumSum,
-            
-    //     }
-    // }
-// }
+
 }
 
 
@@ -546,12 +519,14 @@ fn initOriginalArray() void {
 fn clearRows(_: zx.EventContext) void {
     NumArr.clearRetainingCapacity();
     OriginalNumbers.clearRetainingCapacity();
+    ResultStoredArray.clearRetainingCapacity();
     initOriginalArray();
 
 
     calcHistory.clearRetainingCapacity();
     NumSum = 0;
     currentState = .SelectFirstNumber;
+    hintsShown = 0;
     zx.requestRender();
 }
 
@@ -585,3 +560,6 @@ const zx = @import("zx");
 const std = @import("std");
 const builtin = @import("builtin");
 pub const Button = @import("./ButtonComp.zig").Button;
+const HintComp = @import("./HintComp.zx");
+pub const Hints = HintComp.Hints;
+const HintItem = HintComp.HintItem;
