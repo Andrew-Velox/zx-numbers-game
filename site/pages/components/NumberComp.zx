@@ -104,9 +104,9 @@ fn Card(allocator: zx.Allocator) zx.Component {
             <div @allocator={allocator} style={getSelectOpStyle()}>
                 <span style={selectedNumStyle}>{firstNumber}</span>
                 <button onclick={handleOpAdd} style={opBtnStyle}>+</button>
-                <button onclick={handleOpSub} style={opBtnStyle}>-</button>
+                <button onclick={handleOpSub} style={getSubtructButtonStyle()}>-</button>
                 <button onclick={handleOpMul} style={opBtnStyle}>×</button>
-                <button onclick={handleOpDiv} style={opBtnStyle}>÷</button>
+                <button onclick={handleOpDiv} style={getDivideButtonStyle()}>÷</button>
             </div>
             
             // Select second number state
@@ -180,7 +180,55 @@ fn getNumStyle(idx: usize) []const u8 {
 }
 
 fn getSecondStyle(idx: usize) []const u8 {
-    if (idx < NumArr.items.len and !NumArr.items[idx].isUsed and idx != firstNumberIdx) return numBtnStyle;
+    if (idx >= NumArr.items.len or NumArr.items[idx].isUsed or idx == firstNumberIdx) return hiddenStyle;
+    
+    // subtruct op is selected, show smaller numbers
+
+    if (selectedOperatorIdx == 1) {
+        const val = NumArr.items[idx].value;
+
+        if (val != 0 and firstNumber > val){
+            return numBtnStyle;
+        }
+        return hiddenStyle;
+    }
+
+    // If divide operator is selected, only show divisors
+    if (selectedOperatorIdx == 3) {
+        const val = NumArr.items[idx].value;
+        if (val != 0 and firstNumber % val == 0) {
+            return numBtnStyle;
+        }
+        return hiddenStyle;
+    }
+    
+    return numBtnStyle;
+}
+
+fn getSubtructButtonStyle() []const u8 {
+    if (currentState != .SelectOperator) return hiddenStyle;
+
+    for (NumArr.items, 0..) |item, idx| {
+        if (!item.isUsed and idx != firstNumberIdx and item.value != 0) {
+            if(firstNumber > item.value) {
+                return opBtnStyle;
+            }
+        }
+    }
+    return hiddenStyle;
+}
+
+fn getDivideButtonStyle() []const u8 {
+    if (currentState != .SelectOperator) return hiddenStyle;
+    
+    // Check if firstNumber is divisible by any available number
+    for (NumArr.items, 0..) |item, idx| {
+        if (!item.isUsed and idx != firstNumberIdx and item.value != 0) {
+            if (firstNumber % item.value == 0) {
+                return opBtnStyle;
+            }
+        }
+    }
     return hiddenStyle;
 }
 
