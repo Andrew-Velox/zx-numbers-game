@@ -35,7 +35,7 @@ pub fn Hints(ctx: *zx.ComponentCtx(HintsProps)) zx.Component {
                             <span style="font-size: 16px; font-weight: 600;">Hint {getAndIncrementHintIndex()}:</span>
                             {if (val.isSkipped) (
                                 <div style="display: flex; align-items: center; gap: 8px;">
-                                    <span style="font-size: 18px; font-weight: 700;">
+                                    <span style="font-size: 16px; font-weight: 600;">
                                         Number {val.result} is not Needed.
                                     </span>
                                 </div>
