@@ -142,6 +142,7 @@ fn showNextHintWrapper() void {
 
 // Show hints components codes
 var ResultStoredArray = std.ArrayList(HintItem).empty;
+var Skippedlist = std.ArrayList(u32).empty;
 
 
 // State visibility helpers
@@ -475,18 +476,20 @@ fn makeResultWithRandomOperator() void {
     
     while(NumSum < 100 or NumSum > 999){
         ResultStoredArray.clearRetainingCapacity();
-        
+        Skippedlist.clearRetainingCapacity();
         NumSum = NumArr.items[0].value;
         
         for (NumArr.items[1..]) |val| {
             const op = RandomNumber(3);
             const first_num = NumSum;
+            const skiped_val = val.value;
             switch (op) {
                 0 => NumSum +%= val.value,  // wrapping add
                 1 => {
                     if (NumSum >= val.value) {
                         NumSum -= val.value;
                     } else {
+                        Skippedlist.append(NumArr_allocator, skiped_val) catch @panic("OOM");
                         continue;
                     }
                 },
@@ -494,6 +497,10 @@ fn makeResultWithRandomOperator() void {
                 else => {
                     if (val.value != 0 and NumSum % val.value == 0) {
                         NumSum /= val.value;
+                    }
+                    else{
+                        Skippedlist.append(NumArr_allocator, skiped_val) catch @panic("OOM");
+                        continue;
                     }
                 },
 
@@ -505,9 +512,39 @@ fn makeResultWithRandomOperator() void {
                 .num2 = val.value,
                 .expression = operators[op],
                 .result = NumSum,
+                .isSkipped = false,
             };
             ResultStoredArray.append(NumArr_allocator, getItems) catch @panic("OOM");
             // ...............................................
+        }
+    }
+    
+    // After the loop, add skipped values as hints at the beginning
+    if (Skippedlist.items.len > 0) {
+        // Create a temporary array to hold all hints
+        var tempHints = std.ArrayList(HintItem).empty;
+        
+        // First, add all skipped values as special hints
+        for (Skippedlist.items) |skipped| {
+            const skippedHint = HintItem{
+                .num1 = 0,
+                .num2 = 0,
+                .expression = "",
+                .result = skipped,
+                .isSkipped = true,
+            };
+            tempHints.append(NumArr_allocator, skippedHint) catch @panic("OOM");
+        }
+        
+        // Then add all the calculation hints
+        for (ResultStoredArray.items) |hint| {
+            tempHints.append(NumArr_allocator, hint) catch @panic("OOM");
+        }
+        
+        // Replace ResultStoredArray with the reordered hints
+        ResultStoredArray.clearRetainingCapacity();
+        for (tempHints.items) |hint| {
+            ResultStoredArray.append(NumArr_allocator, hint) catch @panic("OOM");
         }
     }
 

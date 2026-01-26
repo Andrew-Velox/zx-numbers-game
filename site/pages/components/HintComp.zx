@@ -3,6 +3,7 @@ pub const HintItem = struct {
     num2: u32,
     expression: []const u8,
     result: u32,
+    isSkipped: bool = false,
 };
 
 pub const HintsProps = struct {
@@ -18,6 +19,8 @@ pub fn Hints(ctx: *zx.ComponentCtx(HintsProps)) zx.Component {
     const totalHints = ctx.props.totalHints;
     showNextHintCallback = ctx.props.onShowNext;
     
+    currentHintIndex = 0;
+    
     return (
         <div @allocator={ctx.allocator} style={getContainerStyle(totalHints)}>
             <div style={getHintsButtonStyle(totalHints, hintsShown)}>
@@ -25,23 +28,35 @@ pub fn Hints(ctx: *zx.ComponentCtx(HintsProps)) zx.Component {
             </div>
 
             <div style={getHintsDisplayStyle(hintsShown)}>
-                <h1 class="text-2xl font-bold text-white-500 mb-2 bg-gray-500 italic font-mono rounded">HINTS</h1>
+                // <h1 class="text-2xl font-bold text-white-500 mb-2 bg-gray-500 italic p-1 font-mono rounded">HINTS</h1>
                 <ul class="item-list" style="list-style: none; padding: 0; margin: 0;">
                     {for (hints[0..hintsShown]) |val| (
-                        <div style="display: flex; align-items: center; gap: 10px; margin: 10px 0; padding: 16px 20px; background: #1e293b; border-left: 4px solid #3b82f6; border-radius: 8px;">
-                            <span style="color: #e2e8f0; font-size: 16px; font-weight: 600;">
-                                {val.num1}
-                            </span>
-                            <span style="color: #94a3b8; font-size: 16px;">
-                                {val.expression}
-                            </span>
-                            <span style="color: #e2e8f0; font-size: 16px; font-weight: 600;">
-                                {val.num2}
-                            </span>
-                            <span style="color: #94a3b8; font-size: 16px;">=</span>
-                            <span style="color: #3b82f6; font-size: 18px; font-weight: 700; margin-left: 4px;">
-                                {val.result}
-                            </span>
+                        <div style="display: flex; align-items: center; gap: 10px; margin: 10px 0; padding: 16px 20px; background: #1b9930; border-left: 4px solid #6be939; border-radius: 8px;">
+                            <span style="font-size: 16px; font-weight: 600;">Hint {getAndIncrementHintIndex()}:</span>
+                            {if (val.isSkipped) (
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 16px; font-weight: 600;">Skipped:</span>
+                                    <span style="font-size: 18px; font-weight: 700;">
+                                        Number {val.result} is not Needed.
+                                    </span>
+                                </div>
+                            ) else (
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 16px; font-weight: 600;">
+                                        {val.num1}
+                                    </span>
+                                    <span style="font-size: 16px;">
+                                        {val.expression}
+                                    </span>
+                                    <span style="font-size: 16px; font-weight: 600;">
+                                        {val.num2}
+                                    </span>
+                                    <span style="font-size: 16px;">=</span>
+                                    <span style="font-size: 18px; font-weight: 700;">
+                                        {val.result}
+                                    </span>
+                                </div>
+                            )}
                         </div>
                     )}
                 </ul>
@@ -76,6 +91,14 @@ fn getHintsDisplayStyle(hintsShown: usize) []const u8 {
 
 fn handleShowNextHint(_: zx.EventContext) void {
     showNextHintCallback();
+}
+
+var currentHintIndex: usize = 0;
+
+fn getAndIncrementHintIndex() usize {
+    const idx = currentHintIndex;
+    currentHintIndex += 1;
+    return idx + 1;
 }
 
 var showNextHintCallback: *const fn() void = undefined;
